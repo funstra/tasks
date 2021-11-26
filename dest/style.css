@@ -14,6 +14,8 @@ html {
   --light: #aaa;
   --white: #eee;
 
+  --danger: rgb(245, 66, 42);
+
   --family: monospace;
   --fence: 2px var(--white) dashed;
 }
@@ -24,13 +26,16 @@ body {
   height: 100%;
   color: var(--dark);
   font-family: var(--family);
-
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: var(--size-2);
 }
 main {
   display: flex;
   flex-direction: column;
   max-width: 360px;
+  max-height: 640px;
   margin: 0 auto;
   border-radius: var(--size-1);
   height: 100%;
