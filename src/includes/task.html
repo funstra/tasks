@@ -52,21 +52,21 @@
 
             }
             removeTask(e) {
-                this.dispatchEvent(new CustomEvent('app-task:removed', {
+                this.dispatchEvent(new CustomEvent('app-task:task', {
                     bubbles: true,
                     composed: true,
                     detail: {
-                        name: "good"
+                        action: "removed"
                     }
                 }))
                 this.remove()
             }
             connectedCallback() {
-                this.dispatchEvent(new CustomEvent('app-task:added', {
+                this.dispatchEvent(new CustomEvent('app-task:task', {
                     bubbles: true,
                     composed: true,
                     detail: {
-                        name: "good"
+                        action: "added"
                     }
                 }))
             }

@@ -13,25 +13,10 @@
 <body>
     <main>
         <h1>Tasks</h1>
-        <div class="task-container">
-            <!-- TODO - this should turn into a custom element -->
-            <div class="input">
-                <p>count: <span></span></p>
-                <div>
-                    <div>
-                        <div class="input-source">
-                            <label for="taskName">Name: </label>
-                            <input id="taskName" type="text" data-attr="name">
-                        </div>
-                        <div class="input-source">
-                            <label for="taskTask">Task: </label>
-                            <input id="taskTask" type="text" data-attr="task">
-                        </div>
-                    </div>
-                    <button onclick="addTask(event)">add</button>
-                </div>
-            </div>
-            <!-- TODO - this should turn into a custom element -->
+        <!-- TODO - task-container should be a custom element -->
+        <div class="task-container" data-task-threshold="5">
+            <p>count: <span></span></p>
+            <app-taskInput></app-taskInput>
             <div class="tasks">
                 <app-task name="Benny" task="Dishes"></app-task>
                 <app-task name="Jenny" task="Laundry"></app-task>
@@ -39,29 +24,33 @@
                 <app-task name="Lenny" task="Gardening"></app-task>
             </div>
         </div>
+        <!-- TODO - task-container should be a custom element -->
     </main>
     <script>
         window.__host = e => e.target.getRootNode().host
-        window.__callHost = (e, f) => window.__host(e)[f](e)
+        window.__callHost = (e, f, ...args) => window.__host(e)[f](e, args)
 
-        window.addTask = e => {
-            const task = document.createElement('app-task')
-            const parent = e.target.parentElement
-            task.setAttribute('name', parent.querySelector('[data-attr="name"]').value)
-            task.setAttribute('task', parent.querySelector('[data-attr="task"]').value)
-            document.querySelector('.tasks').appendChild(task)
-        }
 
         let numberOfTasks = 0
-        document.body.addEventListener('app-task:added', e => {
-            numberOfTasks++
-            document.querySelector('.task-container p span').textContent = numberOfTasks
-        })
-        document.body.addEventListener('app-task:removed', e => {
-            numberOfTasks--
-            document.querySelector('.task-container p span').textContent = numberOfTasks
+        document.body.addEventListener('app-task:task', e => {
+            switch (e.detail.action) {
+                case 'added':
+                    numberOfTasks++
+                    document.querySelector('.task-container p span').textContent = numberOfTasks
+                    break
+                case 'removed':
+                    numberOfTasks--
+                    document.querySelector('.task-container p span').textContent = numberOfTasks
+            }
+            const taskThreshold = document.querySelector('[data-task-threshold]').dataset.taskThreshold
+            if (numberOfTasks > +taskThreshold) {
+                document.querySelector('.task-container app-taskInput').setAttribute('overflow', '')
+            } else if (numberOfTasks < +taskThreshold) {
+                document.querySelector('.task-container app-taskInput').removeAttribute('overflow')
+            }
         })
     </script>
+    <include src="taskInput.html"></include>
     <include src="task.html"></include>
 </body>
 

@@ -1,0 +1,137 @@
+<template id="template-taskInput">
+    <style>
+        :host {
+            color: var(--dark);
+        }
+
+        .overflow {
+            outline: 2px red dashed;
+            color: red;
+            font-style: italic;
+        }
+
+        .overflow input {
+            pointer-events: none;
+        }
+
+        .input {
+            padding: var(--size-0);
+            display: flex;
+            flex-direction: column;
+            gap: 1ch;
+        }
+
+        .input input {
+            width: 100%;
+        }
+
+        .input button {
+            height: 100%;
+        }
+
+        .input .input-source {
+            display: flex;
+        }
+
+        .input>div {
+            gap: 2ch;
+            display: flex;
+            align-items: center;
+        }
+
+        .input>div button {
+            padding: var(--size-1);
+            padding-inline: var(--size-2);
+        }
+
+        .input>div>div {
+            max-width: 40ch;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--size-0);
+        }
+
+        .input-source {
+            transition: filter 125ms;
+        }
+
+        :not(.overflow) input:hover {
+            filter: invert(1);
+        }
+
+        button {
+            color: inherit;
+            background-color: transparent;
+            border: calc(var(--size-0) / 2) currentColor solid;
+            border-radius: var(--size-0);
+            transition: filter 125ms;
+        }
+        .overflow button{
+            pointer-events: none;
+        }
+
+        :not(.overflow) button:hover {
+            filter: invert(1);
+        }
+
+        label {}
+
+        :not(.overflow) label{
+            pointer-events: none;
+        }
+
+        .input {}
+
+        input {
+            color: inherit;
+            border: none;
+            border-bottom: 1px currentColor solid;
+        }
+    </style>
+    <div class="input">
+        <div>
+            <div>
+                <div class="input-source">
+                    <label for="taskName">Name: </label>
+                    <input id="taskName" type="text" data-attr="name">
+                </div>
+                <div class="input-source">
+                    <label for="taskTask">Task: </label>
+                    <input id="taskTask" type="text" data-attr="task">
+                </div>
+            </div>
+            <button onclick="__callHost(event,'addTask')">add</button>
+        </div>
+    </div>
+</template>
+<script>
+    customElements.define('app-taskinput',
+        class appTaskInput extends HTMLElement {
+            static get observedAttributes() { return ['overflow']; }
+            constructor() {
+                super()
+                this.attachShadow({ mode: 'open' })
+                this.shadowRoot.appendChild(document.querySelector('#template-taskInput').content.cloneNode(true))
+            }
+            addTask = (e, args) => {
+                const task = document.createElement('app-task')
+                const parent = e.target.parentElement
+                task.setAttribute('name', parent.querySelector('[data-attr="name"]').value)
+                task.setAttribute('task', parent.querySelector('[data-attr="task"]').value)
+                document.querySelector('.tasks').appendChild(task)
+            }
+
+            connectedCallback() {
+            }
+            diconnectedCallback() { }
+            attributeChangedCallback(name, oldValue, newValue) {
+                if (name == 'overflow') {
+                    this.shadowRoot.querySelector('.input').classList.toggle('overflow')
+                    this.shadowRoot.querySelectorAll('.input input').forEach(label => {
+                        label.value = oldValue ?? 'to many tasks → 😿'
+                    })
+                }
+            }
+        })
+</script>
