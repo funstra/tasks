@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>include</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main>
+        <h1>Tasks</h1>
+        <div class="task-container">
+            <!-- TODO - this should turn into a custom element -->
+            <div class="input">
+                <p>count: <span></span></p>
+                <div>
+                    <div>
+                        <div class="input-source">
+                            <label for="taskName">Name: </label>
+                            <input id="taskName" type="text" data-attr="name">
+                        </div>
+                        <div class="input-source">
+                            <label for="taskTask">Task: </label>
+                            <input id="taskTask" type="text" data-attr="task">
+                        </div>
+                    </div>
+                    <button onclick="addTask(event)">add</button>
+                </div>
+            </div>
+            <!-- TODO - this should turn into a custom element -->
+            <div class="tasks">
+                <app-task name="Benny" task="Dishes"></app-task>
+                <app-task name="Jenny" task="Laundry"></app-task>
+                <app-task name="Kenny" task="Trash"></app-task>
+                <app-task name="Lenny" task="Gardening"></app-task>
+            </div>
+        </div>
+    </main>
+    <script>
+        window.__host = e => e.target.getRootNode().host
+        window.__callHost = (e, f) => window.__host(e)[f](e)
+
+        window.addTask = e => {
+            const task = document.createElement('app-task')
+            const parent = e.target.parentElement
+            task.setAttribute('name', parent.querySelector('[data-attr="name"]').value)
+            task.setAttribute('task', parent.querySelector('[data-attr="task"]').value)
+            document.querySelector('.tasks').appendChild(task)
+        }
+
+        let numberOfTasks = 0
+        document.body.addEventListener('app-task:added', e => {
+            numberOfTasks++
+            document.querySelector('.task-container p span').textContent = numberOfTasks
+        })
+        document.body.addEventListener('app-task:removed', e => {
+            numberOfTasks--
+            document.querySelector('.task-container p span').textContent = numberOfTasks
+        })
+    </script>
+    <template id="template-task">
+    <style>
+        :host {
+            display: flex;
+            color: var(--dark);
+            font-family: var(--family);
+            max-width: 512px;
+            width: 100%;
+        }
+
+        .inner {
+            padding: 0.25rem;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-grow: 1;
+
+            border: 2px var(--white) dashed;
+        }
+    </style>
+    <div class="inner">
+        <div class="info">
+            <p type="name">Name: <span></span></p>
+            <p type="task">Tasks: <span></span></p>
+        </div>
+        <div class="removeButton" onclick="__callHost(event,'removeTask')">
+            <button>✗</button>
+        </div>
+    </div>
+</template>
+
+<script>
+    customElements.define('app-task',
+        class appTask extends HTMLElement {
+            static get observedAttributes() { return ['name', 'task']; }
+            constructor() {
+                super()
+                this.attachShadow({ mode: 'open' })
+                this.shadowRoot.appendChild(document.querySelector('#template-task').content.cloneNode(true))
+
+            }
+            removeTask(e) {
+                this.dispatchEvent(new CustomEvent('app-task:removed', {
+                    bubbles: true,
+                    composed: true,
+                    detail: {
+                        name: "good"
+                    }
+                }))
+                this.remove()
+            }
+            connectedCallback() {
+                this.dispatchEvent(new CustomEvent('app-task:added', {
+                    bubbles: true,
+                    composed: true,
+                    detail: {
+                        name: "good"
+                    }
+                }))
+            }
+            disconnectedCallback() {
+            }
+            attributeChangedCallback(name, oldValue, newValue) {
+                this.shadowRoot.querySelector(`[type="${name}"] span`).textContent = newValue
+            }
+        })
+</script>
+</body>
+
+</html>

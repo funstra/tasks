@@ -1,0 +1,84 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  --size-0: 0.25rem;
+  --size-1: 0.5rem;
+  --size-2: 1rem;
+  --size-3: 2rem;
+
+  --black: #333;
+  --dark: #555;
+  --light: #aaa;
+  --white: #eee;
+
+  --family: monospace;
+  --fence: 2px var(--white) dashed;
+}
+html {
+  height: 100vh;
+}
+body {
+  height: 100%;
+  color: var(--dark);
+  font-family: var(--family);
+
+  padding: var(--size-2);
+}
+main {
+  height: 100%;
+  padding: var(--size-1);
+  border: var(--fence);
+}
+
+
+/* TODO - This should turn into a custom element */
+
+
+.input input {
+  width: 100%;
+}
+
+.input button {
+  height: 100%;
+}
+
+.task-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-3);
+}
+
+.task-container .tasks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.task-container .input {
+  display: flex;
+  flex-direction: column;
+  gap: 1ch;
+}
+.task-container .input .input-source {
+  display: flex;
+}
+.task-container .input > div {
+  gap: 2ch;
+  display: flex;
+  align-items: center;
+}
+.task-container .input > div button {
+  padding: var(--size-1);
+  padding-inline: var(--size-2);
+}
+.task-container .input > div > div {
+  max-width: 40ch;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+

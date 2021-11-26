@@ -1,0 +1,68 @@
+<template id="template-task">
+    <style>
+        :host {
+            display: flex;
+            color: var(--dark);
+            font-family: var(--family);
+            max-width: 512px;
+            width: 100%;
+        }
+
+        .inner {
+            padding: 0.25rem;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-grow: 1;
+
+            border: 2px var(--white) dashed;
+        }
+    </style>
+    <div class="inner">
+        <div class="info">
+            <p type="name">Name: <span></span></p>
+            <p type="task">Tasks: <span></span></p>
+        </div>
+        <div class="removeButton" onclick="__callHost(event,'removeTask')">
+            <button>✗</button>
+        </div>
+    </div>
+</template>
+
+<script>
+    customElements.define('app-task',
+        class appTask extends HTMLElement {
+            static get observedAttributes() { return ['name', 'task']; }
+            constructor() {
+                super()
+                this.attachShadow({ mode: 'open' })
+                this.shadowRoot.appendChild(document.querySelector('#template-task').content.cloneNode(true))
+
+            }
+            removeTask(e) {
+                this.dispatchEvent(new CustomEvent('app-task:removed', {
+                    bubbles: true,
+                    composed: true,
+                    detail: {
+                        name: "good"
+                    }
+                }))
+                this.remove()
+            }
+            connectedCallback() {
+                this.dispatchEvent(new CustomEvent('app-task:added', {
+                    bubbles: true,
+                    composed: true,
+                    detail: {
+                        name: "good"
+                    }
+                }))
+            }
+            disconnectedCallback() {
+            }
+            attributeChangedCallback(name, oldValue, newValue) {
+                this.shadowRoot.querySelector(`[type="${name}"] span`).textContent = newValue
+            }
+        })
+</script>
