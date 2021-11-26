@@ -82,6 +82,17 @@
 
             border: 2px var(--white) dashed;
         }
+
+        .removeButton button {
+            background-color: transparent;
+            border-radius: 0.25ch;
+            border: 1px var(--danger) solid;
+            color: var(--danger);
+            transition: filter 75ms;
+        }
+        .removeButton button:hover{
+            filter: invert(1);
+        }
     </style>
     <div class="inner">
         <div class="info">
