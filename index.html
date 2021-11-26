@@ -13,25 +13,10 @@
 <body>
     <main>
         <h1>Tasks</h1>
-        <div class="task-container">
-            <!-- TODO - this should turn into a custom element -->
-            <div class="input">
-                <p>count: <span></span></p>
-                <div>
-                    <div>
-                        <div class="input-source">
-                            <label for="taskName">Name: </label>
-                            <input id="taskName" type="text" data-attr="name">
-                        </div>
-                        <div class="input-source">
-                            <label for="taskTask">Task: </label>
-                            <input id="taskTask" type="text" data-attr="task">
-                        </div>
-                    </div>
-                    <button onclick="addTask(event)">add</button>
-                </div>
-            </div>
-            <!-- TODO - this should turn into a custom element -->
+        <!-- TODO - task-container should be a custom element -->
+        <div class="task-container" data-task-threshold="5">
+            <p>count: <span></span></p>
+            <app-taskInput></app-taskInput>
             <div class="tasks">
                 <app-task name="Benny" task="Dishes"></app-task>
                 <app-task name="Jenny" task="Laundry"></app-task>
@@ -39,29 +24,169 @@
                 <app-task name="Lenny" task="Gardening"></app-task>
             </div>
         </div>
+        <!-- TODO - task-container should be a custom element -->
     </main>
     <script>
         window.__host = e => e.target.getRootNode().host
-        window.__callHost = (e, f) => window.__host(e)[f](e)
+        window.__callHost = (e, f, ...args) => window.__host(e)[f](e, args)
 
-        window.addTask = e => {
-            const task = document.createElement('app-task')
-            const parent = e.target.parentElement
-            task.setAttribute('name', parent.querySelector('[data-attr="name"]').value)
-            task.setAttribute('task', parent.querySelector('[data-attr="task"]').value)
-            document.querySelector('.tasks').appendChild(task)
-        }
 
         let numberOfTasks = 0
-        document.body.addEventListener('app-task:added', e => {
-            numberOfTasks++
-            document.querySelector('.task-container p span').textContent = numberOfTasks
-        })
-        document.body.addEventListener('app-task:removed', e => {
-            numberOfTasks--
-            document.querySelector('.task-container p span').textContent = numberOfTasks
+        document.body.addEventListener('app-task:task', e => {
+            switch (e.detail.action) {
+                case 'added':
+                    numberOfTasks++
+                    document.querySelector('.task-container p span').textContent = numberOfTasks
+                    break
+                case 'removed':
+                    numberOfTasks--
+                    document.querySelector('.task-container p span').textContent = numberOfTasks
+            }
+            const taskThreshold = document.querySelector('[data-task-threshold]').dataset.taskThreshold
+            if (numberOfTasks > +taskThreshold) {
+                document.querySelector('.task-container app-taskInput').setAttribute('overflow', '')
+            } else if (numberOfTasks < +taskThreshold) {
+                document.querySelector('.task-container app-taskInput').removeAttribute('overflow')
+            }
         })
     </script>
+    <template id="template-taskInput">
+    <style>
+        :host {
+            color: var(--dark);
+        }
+
+        .overflow {
+            outline: 2px red dashed;
+            color: red;
+            font-style: italic;
+        }
+
+        .overflow input {
+            pointer-events: none;
+        }
+
+        .input {
+            padding: var(--size-0);
+            display: flex;
+            flex-direction: column;
+            gap: 1ch;
+        }
+
+        .input input {
+            width: 100%;
+        }
+
+        .input button {
+            height: 100%;
+        }
+
+        .input .input-source {
+            display: flex;
+        }
+
+        .input>div {
+            gap: 2ch;
+            display: flex;
+            align-items: center;
+        }
+
+        .input>div button {
+            padding: var(--size-1);
+            padding-inline: var(--size-2);
+        }
+
+        .input>div>div {
+            max-width: 40ch;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--size-0);
+        }
+
+        .input-source {
+            transition: filter 125ms;
+        }
+
+        :not(.overflow) input:hover {
+            filter: invert(1);
+        }
+
+        button {
+            color: inherit;
+            background-color: transparent;
+            border: calc(var(--size-0) / 2) currentColor solid;
+            border-radius: var(--size-0);
+            transition: filter 125ms;
+        }
+        .overflow button{
+            pointer-events: none;
+        }
+
+        :not(.overflow) button:hover {
+            filter: invert(1);
+        }
+
+        label {}
+
+        :not(.overflow) label{
+            pointer-events: none;
+        }
+
+        .input {}
+
+        input {
+            color: inherit;
+            border: none;
+            border-bottom: 1px currentColor solid;
+        }
+    </style>
+    <div class="input">
+        <div>
+            <div>
+                <div class="input-source">
+                    <label for="taskName">Name: </label>
+                    <input id="taskName" type="text" data-attr="name">
+                </div>
+                <div class="input-source">
+                    <label for="taskTask">Task: </label>
+                    <input id="taskTask" type="text" data-attr="task">
+                </div>
+            </div>
+            <button onclick="__callHost(event,'addTask')">add</button>
+        </div>
+    </div>
+</template>
+<script>
+    customElements.define('app-taskinput',
+        class appTaskInput extends HTMLElement {
+            static get observedAttributes() { return ['overflow']; }
+            constructor() {
+                super()
+                this.attachShadow({ mode: 'open' })
+                this.shadowRoot.appendChild(document.querySelector('#template-taskInput').content.cloneNode(true))
+            }
+            addTask = (e, args) => {
+                const task = document.createElement('app-task')
+                const parent = e.target.parentElement
+                task.setAttribute('name', parent.querySelector('[data-attr="name"]').value)
+                task.setAttribute('task', parent.querySelector('[data-attr="task"]').value)
+                document.querySelector('.tasks').appendChild(task)
+            }
+
+            connectedCallback() {
+            }
+            diconnectedCallback() { }
+            attributeChangedCallback(name, oldValue, newValue) {
+                if (name == 'overflow') {
+                    this.shadowRoot.querySelector('.input').classList.toggle('overflow')
+                    this.shadowRoot.querySelectorAll('.input input').forEach(label => {
+                        label.value = oldValue ?? 'to many tasks → 😿'
+                    })
+                }
+            }
+        })
+</script>
     <template id="template-task">
     <style>
         :host {
@@ -116,21 +241,21 @@
 
             }
             removeTask(e) {
-                this.dispatchEvent(new CustomEvent('app-task:removed', {
+                this.dispatchEvent(new CustomEvent('app-task:task', {
                     bubbles: true,
                     composed: true,
                     detail: {
-                        name: "good"
+                        action: "removed"
                     }
                 }))
                 this.remove()
             }
             connectedCallback() {
-                this.dispatchEvent(new CustomEvent('app-task:added', {
+                this.dispatchEvent(new CustomEvent('app-task:task', {
                     bubbles: true,
                     composed: true,
                     detail: {
-                        name: "good"
+                        action: "added"
                     }
                 }))
             }
